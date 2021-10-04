@@ -1,120 +1,96 @@
-import collections
 import heapq
-import sys
 import time
 
 import numpy as np
 
 
-class PriorityQueue:
-    """data structure implement priority queue"""
+class PriorityQueue: # priority queue whose priority is estimated from the heuristic function
     def  __init__(self):
-        """initial structure with queue empty and element number = 0"""
-        self.queue = [] # priority queue whose priority is estimated from the heuristic function
+        self.queue = [] 
         self.count = 0 # number of all elements in priority queue
 
-    def push(self, element, priority):
-        """add a element"""
+    def push(self, element, priority):# Push new element item onto the queue
         newElement = (priority, self.count, element)
-        heapq.heappush(self.queue, newElement) # Push new element item onto the queue
+        heapq.heappush(self.queue, newElement) 
         self.count += 1
 
-    def pop(self):
-        """get a element from """
-        (_, _, item) = heapq.heappop(self.queue) # Pop and return the smallest element from the queue
+    def pop(self):# Pop and return the smallest element from the queue
+        (_, _, item) = heapq.heappop(self.queue) 
         return item
 
     def isEmpty(self):
-        """check if queue is empty"""
         return len(self.queue) == 0
 
+def transferToState(input):
+    input = [x.replace('\n','') for x in input]
+    input = [','.join(input[i]) for i in range(len(input))]
+    input = [x.split(',') for x in input]
+    maxColsNum = max([len(x) for x in input])
 
-def transferToGameState(layout):
-    """Transfer the layout of initial puzzle"""
-    layout = [x.replace('\n','') for x in layout]
-    layout = [','.join(layout[i]) for i in range(len(layout))]
-    layout = [x.split(',') for x in layout]
-    maxColsNum = max([len(x) for x in layout])
-
-    for irow in range(len(layout)):
-        for icol in range(len(layout[irow])):
-            if layout[irow][icol] == ' ': layout[irow][icol] = 0   # free space
-            elif layout[irow][icol] == '#': layout[irow][icol] = 1 # wall
-            elif layout[irow][icol] == '&': layout[irow][icol] = 2 # Actor
-            elif layout[irow][icol] == 'B': layout[irow][icol] = 3 # box
-            elif layout[irow][icol] == '.': layout[irow][icol] = 4 # goal
-            elif layout[irow][icol] == 'X': layout[irow][icol] = 5 # box on goal
-        colsNum = len(layout[irow])
+    for irow in range(len(input)):
+        for icol in range(len(input[irow])):
+            if input[irow][icol] == ' ': input[irow][icol] = 0   # free space
+            elif input[irow][icol] == '#': input[irow][icol] = 1 # wall
+            elif input[irow][icol] == 'A': input[irow][icol] = 2 # actor
+            elif input[irow][icol] == 'X': input[irow][icol] = 3 # box
+            elif input[irow][icol] == '_': input[irow][icol] = 4 # goal
+            elif input[irow][icol] == 'O': input[irow][icol] = 5 # box on goal
+            elif input[irow][icol] == 'E': input[irow][icol] = 6 # actor on goal
+        colsNum = len(input[irow])
         if colsNum < maxColsNum:
-            layout[irow].extend([1 for _ in range(maxColsNum-colsNum)]) 
-    return np.array(layout)
+            input[irow].extend([1 for _ in range(maxColsNum-colsNum)]) 
+    return np.array(input)
 
+def actorPosition(state):
+    return tuple(np.argwhere((state == 2) | (state == 6))[0])
 
-def actorPosition(gameState):
-    """get position of Actor"""
-    return tuple(np.argwhere(gameState == 2)[0]) # e.g. (2, 2)
+def boxPosition(state):
+    return tuple(tuple(x) for x in np.argwhere((state == 3) | (state == 5))) 
 
+def wallPosition(state):
+    return tuple(tuple(x) for x in np.argwhere(state == 1))
 
-def boxPosition(gameState):
-    """get positions of boxes"""
-    return tuple(tuple(x) for x in np.argwhere((gameState == 3) | (gameState == 5))) # e.g. ((2, 3), (3, 4), (4, 4), (6, 1), (6, 4), (6, 5))
-
-
-def wallPosition(gameState):
-    """get positions of walls"""
-    return tuple(tuple(x) for x in np.argwhere(gameState == 1)) # e.g. like those above
-
-
-def goalPosition(gameState):
-    """get positions of goals"""
-    return tuple(tuple(x) for x in np.argwhere((gameState == 4) | (gameState == 5))) # e.g. like those above
-
+def goalPosition(state):
+    return tuple(tuple(x) for x in np.argwhere((state == 4) | (state == 5) | (state == 6)))
 
 def isWInGame(posBox):
-    """check if the game was won"""
     return sorted(posBox) == sorted(posGoals) # check the positions of the boxes are fully located at the position of the goal
 
-
 def isValidMove(move, posActor, posBox):
-    """check if the move is valid or not"""
     xActor, yActor = posActor
-    if move[-1].isupper(): # actor push the box
+    if move[-1]: # actor push the box
         xNext, yNext = xActor + 2 * move[0], yActor + 2 * move[1]
     else: # move to empty space
         xNext, yNext = xActor + move[0], yActor + move[1]
     return (xNext, yNext) not in posBox + posWalls # the location must not coincide with the wall or box
 
-
 def nextMoves(posActor, posBox):
-    """check and return all next valid moves"""
     xActor, yActor = posActor # current coordinates of actor
     allNextMoves = []
-    for move in [[-1, 0, 'u', 'U'],[1, 0, 'd', 'D'],[0, -1, 'l', 'L'],[0, 1, 'r', 'R']]: # left, top, down, right move
+    for move in [[-1, 0],[1, 0],[0, -1],[0, 1]]: # left, top, down, right move
         xNext, yNext = xActor + move[0], yActor + move[1] # actor move
         if (xNext, yNext) in posBox: # actor push the box
-            move.pop(2) # delete lower case character
+            move.append(True)
         else:
-            move.pop(3) # delete upper case character
+            move.append(False) 
         if isValidMove(move, posActor, posBox):
             allNextMoves.append(move)
     return tuple(tuple(x) for x in allNextMoves) # return all next valid moves
 
-
 def updateState(posActor, posBox, move):
-    """updated state after moving"""
     xActor, yActor = posActor # previous position of actor
     newPosActor = [xActor + move[0], yActor + move[1]] # current position of Actor
     posBox = [list(x) for x in posBox]
-    if move[-1].isupper(): # if actor push the box, update position of box
+
+    if move[-1]: # if actor push the box, update position of box
         posBox.remove(newPosActor) # remove the pushed box
         posBox.append([xActor + 2 * move[0], yActor + 2 * move[1]]) # add box in new position pushed
+
     posBox = tuple(tuple(x) for x in posBox)
     newPosActor = tuple(newPosActor)
     return newPosActor, posBox # return new position of actor and boxs
 
-
 def isFailed(posBox):
-    """observe if the state is potentially failed, then prune the search"""
     rotatePattern = [[0,1,2,3,4,5,6,7,8],
                     [2,5,8,1,4,7,0,3,6],
                     [0,1,2,3,4,5,6,7,8][::-1],
@@ -139,81 +115,98 @@ def isFailed(posBox):
                 elif newBoard[1] in posBox and newBoard[6] in posBox and newBoard[2] in posWalls and newBoard[3] in posWalls and newBoard[8] in posWalls: return True
     return False
 
-
-def heuristic(posActor, posBox):
-    """estimate the total distance from the boxes to the  goals"""
+def heuristic(posActor, posBox): # h(n) heuristic function that estimates the cost of the cheapest path from n to the goal
     distance = 0
     completes = set(posGoals) & set(posBox) # positions box at goal 
     sortposBox = list(set(posBox).difference(completes)) # positions box not at goal
     sortposGoals = list(set(posGoals).difference(completes)) # positions goal not contain box
+
     for i in range(len(sortposBox)):
         distance += (abs(sortposBox[i][0] - sortposGoals[i][0])) + (abs(sortposBox[i][1] - sortposGoals[i][1]))
     return distance
 
+def cost(node): # g(n) the cost of the path from the start node to n
+    return len(node)
 
-def cost(moves):
-    """costs calculation from start to current state"""
-    return len([x for x in moves if x.islower()])
-
-
-def aSearchAlgorithm():
-    """A* search algorithm"""
-    beginBox = boxPosition(gameState) # get position of boxs
-    beginActor = actorPosition(gameState) # get position of actor
-
-    initial = (beginActor, beginBox)
+def aSearchAlgorithm(): 
+    beginBox = boxPosition(state) # get position of boxs
+    beginActor = actorPosition(state) # get position of actor
     priorityQueue = PriorityQueue() 
-    priorityQueue.push([initial], heuristic(beginActor, beginBox)) 
+    priorityQueue.push([(beginActor, beginBox)], heuristic(beginActor, beginBox)) 
     exploredSet = set()
-    moves = PriorityQueue()
-    moves.push([0], heuristic(beginActor, initial[1]))
+
     while priorityQueue:
         node = priorityQueue.pop()
-        node_move = moves.pop()
         if isWInGame(node[-1][-1]):
-            print(','.join(node_move[1:]).replace(',',''))
-            break
+            return node
         if node[-1] not in exploredSet:
             exploredSet.add(node[-1])
-            Cost = cost(node_move[1:])
-            for move in nextMoves(node[-1][0], node[-1][1]):
+            gCost = cost(node)
+            allNextMoves = nextMoves(node[-1][0], node[-1][1]) 
+            for move in allNextMoves:
                 newPosActor, newPosBox = updateState(node[-1][0], node[-1][1], move)
-                if isFailed(newPosBox):
-                    continue
-                Heuristic = heuristic(newPosActor, newPosBox)
-                priorityQueue.push(node + [(newPosActor, newPosBox)], Heuristic + Cost) 
-                moves.push(node_move + [move[-1]], Heuristic + Cost)
+                if not isFailed(newPosBox):
+                    priorityQueue.push(node + [(newPosActor, newPosBox)], heuristic(newPosActor, newPosBox) + gCost)
+    return []
 
 
-"""Read command"""
-def readCommand(argv):
-    from optparse import OptionParser
-    
-    parser = OptionParser()
-    parser.add_option('-l', '--level', dest='sokobanLevels',
-                      help='level of game to play', default='level1.txt')
-    parser.add_option('-m', '--method', dest='agentMethod',
-                      help='research method', default='bfs')
-    args = dict()
-    options, _ = parser.parse_args(argv)
-    with open('test/' + options.sokobanLevels,"r") as f: 
-        layout = f.readlines()
-    args['layout'] = layout
-    args['method'] = options.agentMethod
-    return args
+def printResult(node, name):   
+    maxHeight = len(initial) # max width display of game
+    maxWidth = max(len(i) for i in initial) - 1 # max height display of game
+    with open("solutions/" + filename, "w") as f:
+        for nd in node:
+            for i in range(0, maxWidth):
+                for j in range(0, maxHeight):
+                    ch = ' '
+                    position = (i, j)
+                    if position in posGoals:
+                        if position in nd[1]:
+                            ch = 'O'
+                        elif position == nd[0]:
+                            ch = 'B'
+                        else:
+                            ch = '_'
+                    elif position in posWalls:
+                        ch = '#'
+                    elif position in nd[1]:
+                        ch = 'X'
+                    elif position == nd[0]:
+                        ch = 'A'
+                    f.write(ch)
+                f.write('\n')
+            f.write('\n')
+   
+
 
 if __name__ == '__main__':
-    time_start = time.time()
-    layout, method = readCommand(sys.argv[1:]).values()
+    # select type input of game
+    while True:
+        type = input("Select input type (1 - Mini Comos, 2 - Mirco Comos): ")
+        if type in ["1", "2"]:
+            break
 
-    gameState = transferToGameState(layout)
-    posWalls = wallPosition(gameState)
-    posGoals = goalPosition(gameState)
+    # select lever input of game
+    while True:
+        lever = input("Select lever (1 - 60): ")
+        if lever in ["1", "2"]:
+            break
 
-    if method == 'astar':
-        aSearchAlgorithm()
+    filename = "{0}-{1}.txt".format("mini" if type == "1" else "micro", lever)
+    # read game input from files in folder test/
+    with open("test/" + filename,"r") as f:
+        initial = f.readlines()
+
+    state = transferToState(initial)
+    posWalls = wallPosition(state)
+    posGoals = goalPosition(state)
+
+    startTime = time.time()
+    result = aSearchAlgorithm()
+    endTime=time.time()
+
+    print("Runtime: {0} second.".format(endTime - startTime))
+
+    if result:
+        printResult(result, filename)
     else:
-        raise ValueError('Invalid method.')
-
-    time_end=time.time()
-    print('Runtime of %s: %.2f second.' %(method, time_end-time_start))
+        print("Can't find the solution")

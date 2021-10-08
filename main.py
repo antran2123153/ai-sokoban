@@ -1,6 +1,6 @@
 import heapq
 import time
-
+import collections
 import numpy as np
 
 
@@ -126,9 +126,9 @@ def heuristic(posActor, posBox): # h(n) heuristic function that estimates the co
     return distance
 
 def cost(node): # g(n) the cost of the path from the start node to n
-    return len(node)
+    return len([nd for nd in node if nd[-1]])
 
-def aSearchAlgorithm(): 
+def aStarAlgorithm(): 
     beginBox = boxPosition(state) # get position of boxs
     beginActor = actorPosition(state) # get position of actor
     priorityQueue = PriorityQueue() 
@@ -150,7 +150,30 @@ def aSearchAlgorithm():
     return []
 
 
-def printResult(node, name):   
+def DFSalgorithm():
+    beginBox = boxPosition(state)                          # get position of boxs
+    beginPlayer = actorPosition(state)                     # get position of actor
+
+    startState = (beginPlayer, beginBox)
+    frontier = collections.deque([[startState]])
+    exploredSet = set()
+    actions = [[0]] 
+    while frontier:
+        node = frontier.pop()
+        node_action = actions.pop()
+        if isWInGame(node[-1][-1]):
+            return node
+        if node[-1] not in exploredSet:
+            exploredSet.add(node[-1])
+            for action in nextMoves(node[-1][0], node[-1][1]):
+                newPosPlayer, newPosBox = updateState(node[-1][0], node[-1][1], action)
+                if isFailed(newPosBox):
+                    continue
+                frontier.append(node + [(newPosPlayer, newPosBox)])
+                actions.append(node_action + [action[-1]])
+
+
+def printResult(node, name):
     maxHeight = len(initial) # max width display of game
     maxWidth = max(len(i) for i in initial) - 1 # max height display of game
     with open("solutions/" + filename, "w") as f:
@@ -176,8 +199,7 @@ def printResult(node, name):
                 f.write('\n')
             f.write('\n')
    
-
-
+   
 if __name__ == '__main__':
     # select type input of game
     while True:
@@ -190,6 +212,11 @@ if __name__ == '__main__':
         lever = input("Select lever (1 - 60): ")
         if lever in ["1", "2"]:
             break
+    
+    while True:
+        alg = input("Select search algorithm (1 - DFS algorithm, 2 - A start algorithm): ")
+        if alg in ["1", "2"]:
+            break
 
     filename = "{0}-{1}.txt".format("mini" if type == "1" else "micro", lever)
     # read game input from files in folder test/
@@ -201,7 +228,12 @@ if __name__ == '__main__':
     posGoals = goalPosition(state)
 
     startTime = time.time()
-    result = aSearchAlgorithm()
+    if alg == "1":
+        print("Using the DFS algorithm to solve")
+        result = DFSalgorithm()
+    else:
+        print("Using the A start algorithm to solve")
+        result = aStarAlgorithm()
     endTime=time.time()
 
     print("Runtime: {0} second.".format(endTime - startTime))

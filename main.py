@@ -101,33 +101,37 @@ def updateState(posActor, posBoxs, move):
 # Output: True nếu có ít nhất 1 box ở vị trí không an toàn(gây ra trạng thái bí), False nếu ngược lại
 ####################################################################################################
 def isFailed(posBoxs):
-    rotatePattern = [[0,1,2,3,4,5,6,7,8],
-                    [2,5,8,1,4,7,0,3,6],
-                    [0,1,2,3,4,5,6,7,8][::-1],
-                    [2,5,8,1,4,7,0,3,6][::-1]]
-    flipPattern = [[2,1,0,5,4,3,8,7,6],
-                    [0,3,6,1,4,7,2,5,8],
-                    [2,1,0,5,4,3,8,7,6][::-1],
-                    [0,3,6,1,4,7,2,5,8][::-1]]
-    allPattern = rotatePattern + flipPattern
+    for box in posBoxs: # duyệt qua các box để kiểm tra
+        if box in posGoals: # nếu box đã nằm ở goal thì không xét
+            continue
+        
+        if (box[0] + 1, box[1]) in posWalls: # bên phải box là wall
+            if ((box[0], box[1] + 1) in posWalls) or ((box[0], box[1] - 1) in posWalls): # phía trên hoặc dưới box là tường
+                return True
+            if ((box[0], box[1] + 1) in posBoxs) and (box[0] + 1, box[1] + 1) in posWalls: # phía trên có box khác(box này bên phải cũng có wall)
+                return True
+            if ((box[0], box[1] - 1) in posBoxs) and (box[0] + 1, box[1] - 1) in posWalls: # phía dưới có box khác(box này bên phải cũng có wall)
+                return True
 
-    for box in posBoxs:
-        if box not in posGoals:
-            board = [(box[0] - 1, box[1] - 1), (box[0] - 1, box[1]), (box[0] - 1, box[1] + 1), 
-                    (box[0], box[1] - 1), (box[0], box[1]), (box[0], box[1] + 1), 
-                    (box[0] + 1, box[1] - 1), (box[0] + 1, box[1]), (box[0] + 1, box[1] + 1)]
-            for pattern in allPattern:
-                newBoard = [board[i] for i in pattern]
-                if newBoard[1] in posWalls and newBoard[5] in posWalls: 
-                    return True
-                elif newBoard[1] in posBoxs and newBoard[2] in posWalls and newBoard[5] in posWalls: 
-                    return True
-                elif newBoard[1] in posBoxs and newBoard[2] in posWalls and newBoard[5] in posBoxs: 
-                    return True
-                elif newBoard[1] in posBoxs and newBoard[2] in posBoxs and newBoard[5] in posBoxs: 
-                    return True
-                elif newBoard[1] in posBoxs and newBoard[6] in posBoxs and newBoard[2] in posWalls and newBoard[3] in posWalls and newBoard[8] in posWalls: 
-                    return True
+        if (box[0] - 1, box[1]) in posWalls: # bên trái box là wall
+            if ((box[0], box[1] + 1) in posWalls) or ((box[0], box[1] - 1) in posWalls): # phía trên hoặc dưới box là tường
+                return True
+            if ((box[0], box[1] + 1) in posBoxs) and (box[0] - 1, box[1] + 1) in posWalls: # phía trên có box khác(box này bên trái cũng có wall)
+                return True
+            if ((box[0], box[1] - 1) in posBoxs) and (box[0] - 1, box[1] - 1) in posWalls: # phía trên có box khác(box này bên trái cũng có wall)
+                return True
+
+        if (box[0], box[1] + 1) in posWalls: # phía trên box là wall
+            if ((box[0] + 1, box[1]) in posBoxs) and (box[0] + 1, box[1] + 1) in posWalls: # bên phải có box khác(box này phía trên cũng có wall)
+                return True
+            if ((box[0] - 1, box[1]) in posBoxs) and (box[0] - 1, box[1] + 1) in posWalls: # bên trái có box khác(box này phía trên cũng có wall)
+                return True
+
+        if (box[0], box[1] - 1) in posWalls: # phía dưới box là wall
+            if ((box[0] + 1, box[1]) in posBoxs) and (box[0] + 1, box[1] - 1) in posWalls: # bên phải có box khác(box này phía dưới cũng có wall)
+                return True
+            if ((box[0] - 1, box[1]) in posBoxs) and (box[0] - 1, box[1] - 1) in posWalls: # bên trái có box khác(box này phía dưới cũng có wall)
+                return True
     return False
 
 ####################################################################################################
@@ -222,7 +226,7 @@ def printResult():
                         if position in rs[1]:
                             ch = 'O'
                         elif position == rs[0]:
-                            ch = 'B'
+                            ch = 'E'
                         else:
                             ch = '_'
                     elif position in posWalls:

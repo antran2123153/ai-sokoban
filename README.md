@@ -25,9 +25,11 @@
 
 ## Ví dụ cho kết quả của màn hình console sau khi chạy xong:
 
-> Select input type (1 - Mini Comos, 2 - Micro Comos): 1
-> Select lever (1 - 60): 20
-> Select search algorithm (1 - DFS algorithm, 2 - A start algorithm): 2
-> Using the A start algorithm to solve...
-> Runtime: 2.8360002040863037 second.
-> Total step: 113
+```
+Select input type (1 - Mini Comos, 2 - Micro Comos): 1
+Select lever (1 - 60): 20
+Select search algorithm (1 - DFS algorithm, 2 - A start algorithm): 2
+Using the A start algorithm to solve...
+Runtime: 2.8360002040863037 second.
+Total step: 113
+```

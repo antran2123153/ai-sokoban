@@ -9,12 +9,25 @@
 
 ## Hướng dẫn chạy code:
 
-- Bước 1: nhập lệnh: pip install numpy time heapq
-- Bước 2: nhập lệnh: python main.py
+- Bước 1: nhập lệnh:
+  > pip install numpy time heapq
+- Bước 2: nhập lệnh:
+  > python main.py
 - Bước 3: lựa chọn input đầu vào (mini, micro) và kiểu giải thuật (DFS, Astar) cho bài toán
 
-### Các input(trạng thái đầu game) nằm ở các file trong thư mục test/
+## Thông tin thêm
 
-### Các output(kết quả và hướng dẫn giải tường bước cho bài toán) nằm ở các file trong thư mục solutions/
+- Thư mục inputs: chứa các trạng thái khởi đầu cho game, bao gồm 2 loại là mini và micro
 
-### Thời gian chạy giải thuật được in ra tại màn hình console sau khi chạy hoàn tất, nếu giải thuật không tìm kiếm được kết quả khả thi màn hình console sẽ trả về thông báo "Can't find the solution" nếu có sẽ trả về số bước đi mà giải thuật tìm kiếm được và in ra file output
+- Thư mục output: là két quả giải từng bước của input đầu vào tương ứng sau khi chạy giải thuật
+
+- Thời gian chạy giải thuật được in ra tại màn hình console sau khi chạy hoàn tất, nếu giải thuật không tìm kiếm được kết quả khả thi màn hình console sẽ trả về thông báo "Can't find the solution" nếu có sẽ trả về số bước đi mà giải thuật tìm kiếm được và in ra file output
+
+## Ví dụ cho kết quả của màn hình console sau khi chạy xong:
+
+> Select input type (1 - Mini Comos, 2 - Micro Comos): 1
+> Select lever (1 - 60): 20
+> Select search algorithm (1 - DFS algorithm, 2 - A start algorithm): 2
+> Using the A start algorithm to solve...
+> Runtime: 2.8360002040863037 second.
+> Total step: 113

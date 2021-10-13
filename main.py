@@ -16,18 +16,28 @@ def makeGameState(input):
     input = [x.split(',') for x in input] # chuyển các chuỗi tương ứng thành mảng các ký tự
     maxWeight = max([len(x) for x in input])
 
-    for irow in range(height):
-        for icol in range(len(input[irow])):
-            if input[irow][icol] == ' ': input[irow][icol] = 0 # ô trống
-            elif input[irow][icol] == '#': input[irow][icol] = 1 # wall
-            elif input[irow][icol] == 'A': input[irow][icol] = 2 # actor
-            elif input[irow][icol] == 'X': input[irow][icol] = 3 # box
-            elif input[irow][icol] == '_': input[irow][icol] = 4 # goal
-            elif input[irow][icol] == 'O': input[irow][icol] = 5 # box đang đứng ở goal
-            elif input[irow][icol] == 'E': input[irow][icol] = 6 # actor đang đứng ở goal
-        colsNum = len(input[irow])
+    saveWalls = []
+
+    for i in range(height):
+        for j in range(len(input[i])):
+            if input[i][j] == ' ': 
+                input[i][j] = 0 # ô trống
+            elif input[i][j] == '#': 
+                input[i][j] = 1 # wall
+                saveWalls += [(i, j)]
+            elif input[i][j] == 'A': 
+                input[i][j] = 2 # actor
+            elif input[i][j] == 'X': 
+                input[i][j] = 3 # box
+            elif input[i][j] == '_': 
+                input[i][j] = 4 # goal
+            elif input[i][j] == 'O': 
+                input[i][j] = 5 # box đang đứng ở goal
+            elif input[i][j] == 'E': 
+                input[i][j] = 6 # actor đang đứng ở goal
+        colsNum = len(input[i])
         if colsNum < maxWeight:
-            input[irow].extend([1 for _ in range(maxWeight-colsNum)]) # các ô trống phía ngoài wall được xem như wall
+            input[i].extend([1 for _ in range(maxWeight-colsNum)]) # các ô trống phía ngoài wall được xem như wall
     
     array = np.array(input)
     posWalls = tuple(tuple(x) for x in np.argwhere(array == 1)) # tọa độ của các wall
@@ -35,8 +45,7 @@ def makeGameState(input):
     initialBoxs = tuple(tuple(x) for x in np.argwhere((array == 3) | (array == 5))) # tọa độ của các box
     initialActor = tuple(np.argwhere((array == 2) | (array == 6))[0]) # toạn độ của actor
 
-    return (posWalls, posGoals, initialBoxs, initialActor)
-
+    return (posWalls, posGoals, initialBoxs, initialActor, saveWalls)
 
 ####################################################################################################
 # Hàm isWInGame
@@ -215,11 +224,16 @@ def DFSalgorithm():
 ####################################################################################################
 def printResult():
     maxHeight = len(initial)
-    maxWidth = max([len(i) for i in initial]) - 1
-    with open("solutions/" + filename, "w") as f:
+    maxWidth = max([len(i) for i in initial])
+
+    # print(len(posWalls))
+
+    # print(saveWalls)
+
+    with open("outputs/" + filename, "w") as f:
         for rs in result:
-            for i in range(0, maxWidth):
-                for j in range(0, maxHeight):
+            for i in range(maxHeight):
+                for j in range(maxWidth - 1):
                     ch = ' '
                     position = (i, j)
                     if position in posGoals:
@@ -229,7 +243,7 @@ def printResult():
                             ch = 'E'
                         else:
                             ch = '_'
-                    elif position in posWalls:
+                    elif position in saveWalls:
                         ch = '#'
                     elif position in rs[1]:
                         ch = 'X'
@@ -244,23 +258,23 @@ def printResult():
 ####################################################################################################
 if __name__ == '__main__':
     while True:
-        type = input("Select input type (1 - Mini Comos, 2 - Mirco Comos): ")
+        type = input("Select input type (1 - Mini Comos, 2 - Micro Comos): ")
         if type in ["1", "2"]:
             break
     while True:
         lever = input("Select lever (1 - 60): ")
-        if lever in ["1", "2"]:
+        if int(lever) > 0 and int(lever) <= 20:
             break
     while True:
         alg = input("Select search algorithm (1 - DFS algorithm, 2 - A start algorithm): ")
         if alg in ["1", "2"]:
             break
 
-    filename = "{0}-{1}.txt".format("mini" if type == "1" else "micro", lever)
-    with open("test/" + filename,"r") as f:
+    filename = "{0}/{1}.txt".format("mini" if type == "1" else "micro", lever)
+    with open("inputs/" + filename,"r") as f:
         initial = f.readlines()
 
-    (posWalls, posGoals, initialBoxs, initialActor)  = makeGameState(initial)
+    (posWalls, posGoals, initialBoxs, initialActor, saveWalls)  = makeGameState(initial)
 
     startTime = time.time()
     if alg == "1":

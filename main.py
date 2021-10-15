@@ -184,16 +184,17 @@ def aStarAlgorithm():
         (_, node) = heapq.heappop(priorityQueue) # lấy 1 node ra khỏi queue
         if isWInGame(node[-1][-1]):
             return node
-        if node[-1] not in exploredSet: # duyệt node nếu nó chưa từng đi qua
-            exploredSet.add(node[-1]) # đánh dấu node là đã đi qua
-            cost = costFunction(node) # g(n)
-            allNextMoves = nextMoves(node[-1][0], node[-1][1]) # các bước di chuyển hợp lệ tiếp theo
-            for move in allNextMoves:
-                newPosActor, newPosBox = updateState(node[-1][0], node[-1][1], move) 
-                if not isFailed(newPosBox): # bỏ qua nếu vị trí mới của box dẫn đến trạng thái bí
-                    saveNode = node + [(newPosActor, newPosBox)] 
-                    priority = heuristicFunction(newPosBox) + cost # priority = h(n) + g(n)
-                    heapq.heappush(priorityQueue,(priority, saveNode)) # thêm node vào queue 
+        if node[-1] in exploredSet: # bor qua node nếu nó đã từng đi qua
+            continue
+        exploredSet.add(node[-1]) # đánh dấu node là đã đi qua
+        cost = costFunction(node) # g(n)
+        allNextMoves = nextMoves(node[-1][0], node[-1][1]) # các bước di chuyển hợp lệ tiếp theo
+        for move in allNextMoves:
+            newPosActor, newPosBox = updateState(node[-1][0], node[-1][1], move) 
+            if not isFailed(newPosBox): # bỏ qua nếu vị trí mới của box dẫn đến trạng thái bí
+                saveNode = node + [(newPosActor, newPosBox)] 
+                priority = heuristicFunction(newPosBox) + cost # priority = h(n) + g(n)
+                heapq.heappush(priorityQueue,(priority, saveNode)) # thêm node vào queue 
     return []
 
 ####################################################################################################
@@ -262,8 +263,8 @@ if __name__ == '__main__':
         if type in ["1", "2"]:
             break
     while True:
-        lever = input("Select lever (1 - 60): ")
-        if int(lever) > 0 and int(lever) <= 20:
+        lever = input("Select lever (1 - 30): ")
+        if int(lever) > 0 and int(lever) <= 30:
             break
     while True:
         alg = input("Select search algorithm (1 - DFS algorithm, 2 - A start algorithm): ")
@@ -281,7 +282,7 @@ if __name__ == '__main__':
         print("Using the DFS algorithm to solve...")
         result = DFSalgorithm()
     else:
-        print("Using the A start algorithm to solve...")
+        print("Using the A star algorithm to solve...")
         result = aStarAlgorithm()
     endTime=time.time()
 

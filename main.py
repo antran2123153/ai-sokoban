@@ -1,8 +1,10 @@
-from abc import abstractmethod
+import collections
 import heapq
 import time
-import collections
+from abc import abstractmethod
+
 import numpy as np
+
 
 ####################################################################################################
 # Hàm makeGameState
@@ -176,15 +178,14 @@ def costFunction(node):
 def aStarAlgorithm():
     priorityQueue = [] # danh sách được sử dụng như priority queue để hỗ trợ giải thuật
     initialNode = [(initialActor, initialBoxs)] # trạng thái ban đầu của game, chỉ lưu các thành phần động
-    priority = heuristicFunction(initialBoxs) 
-    heapq.heappush(priorityQueue,(priority, initialNode)) # thêm 1 node vào queue
+    heapq.heappush(priorityQueue,(0, initialNode)) # thêm 1 node vào queue, node đầu priority = 0
     exploredSet = set() # bảng hashing để lưu các trạng thái đã từng đi qua
 
     while priorityQueue:
         (_, node) = heapq.heappop(priorityQueue) # lấy 1 node ra khỏi queue
         if isWInGame(node[-1][-1]):
             return node
-        if node[-1] in exploredSet: # bor qua node nếu nó đã từng đi qua
+        if node[-1] in exploredSet: # bỏ qua node nếu nó đã từng đi qua
             continue
         exploredSet.add(node[-1]) # đánh dấu node là đã đi qua
         cost = costFunction(node) # g(n)
@@ -226,11 +227,6 @@ def DFSalgorithm():
 def printResult():
     maxHeight = len(initial)
     maxWidth = max([len(i) for i in initial])
-
-    # print(len(posWalls))
-
-    # print(saveWalls)
-
     with open("outputs/" + filename, "w") as f:
         for rs in result:
             for i in range(maxHeight):

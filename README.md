@@ -10,7 +10,7 @@
 ## Hướng dẫn chạy code:
 
 - Bước 1: nhập lệnh:
-  > pip install numpy time heapq
+  > pip install numpy
 - Bước 2: nhập lệnh:
   > python main.py
 - Bước 3: lựa chọn input đầu vào (mini, micro) và kiểu giải thuật (DFS, Astar) cho bài toán

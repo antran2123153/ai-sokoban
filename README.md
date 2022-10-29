@@ -1,29 +1,31 @@
-## Ký hiệu được sử dụng để mô phỏng cho các đối tượng trong trò chơi sokoban:
+# AI sokoban game
 
-- A : đại diện cho đối tượng mà người dùng điều khiển
-- E : đại diện cho đối tượng mà tại đó có cả 2 đối tượng: người dùng điều khiển và vị trí đích
-- X : đại diện cho đối tượng các khối hộp cần được đẩy đến vị trí đích
-- \# : đại diện cho đối tượng là các khối đá chắn(hoặc bức tường)
-- \_ : đại diện cho đối tượng là vị trí đích mà ta cần đẩy khối hộp đến
-- O : đại diện cho đối tượng mà tại đó có cả 2 đối tượng: khối hộp và vị trí đích
+## Symbols used to simulate objects in the sokoban game:
 
-## Hướng dẫn chạy code:
+- A : represents the object that the user controls
+- E : represents the object where there are two objects: user control and target location
+- X : represents the block object that needs to be pushed to the target location
+- \# : represents objects that are blocks (or walls)
+- \_ : represents the object that is the target position that we need to push the box to
+- O : represents the object where there are two objects: the box and the target location
 
-- Bước 1: nhập lệnh:
+## Instructions to run the code:
+
+Step 1: Enter the command:
   > pip install numpy
-- Bước 2: nhập lệnh:
+Step 2: Enter the command:
   > python main.py
-- Bước 3: lựa chọn input đầu vào (mini, micro) và kiểu giải thuật (DFS, Astar) cho bài toán
+- Step 3: select input input (mini, micro) and algorithm type (DFS, Astar) for the problem
 
-## Thông tin thêm
+## More information
 
-- Thư mục inputs: chứa các trạng thái khởi đầu cho game, bao gồm 2 loại là mini và micro
+- Inputs folder: contains the starting state for the game, including 2 types, mini and micro
 
-- Thư mục output: là két quả giải từng bước của input đầu vào tương ứng sau khi chạy giải thuật
+- Output directory: is the result of step-by-step solution of the corresponding input after running the algorithm
 
-- Thời gian chạy giải thuật được in ra tại màn hình console sau khi chạy hoàn tất, nếu giải thuật không tìm kiếm được kết quả khả thi màn hình console sẽ trả về thông báo "Can't find the solution" nếu có sẽ trả về số bước đi mà giải thuật tìm kiếm được và in ra file output
+- The algorithm running time is printed at the console screen after running, if the algorithm can't find a possible result, the console will return the message "Can't find the solution" if it does. about the number of steps that the algorithm can find and print the output file
 
-## Ví dụ cho kết quả của màn hình console sau khi chạy xong:
+## Example for console output after running:
 
 ```
 Select input type (1 - Mini Comos, 2 - Micro Comos): 1
